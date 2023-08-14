@@ -1,5 +1,5 @@
 import Downshift from "downshift"
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect, useRef } from "react"
 import classNames from "classnames"
 import { DropdownPosition, GetDropdownPositionFn, InputSelectOnChange, InputSelectProps } from "./types"
 
@@ -30,6 +30,25 @@ export function InputSelect<TItem>({
     [consumerOnChange]
   )
 
+  const ClickBoxRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const updateDropdownPosition = () => {
+      const element = ClickBoxRef.current
+      if (element) {
+        const top = element.getBoundingClientRect().bottom
+        const left = element.getBoundingClientRect().left
+        setDropdownPosition({ top, left })
+        console.log(element.getBoundingClientRect())
+      }
+    }
+
+    window.addEventListener("scroll", updateDropdownPosition)
+
+    return () => {
+      window.removeEventListener("scroll", updateDropdownPosition)
+    }
+  }, [])
+
   return (
     <Downshift<TItem>
       id="RampSelect"
@@ -57,6 +76,7 @@ export function InputSelect<TItem>({
             </label>
             <div className="RampBreak--xs" />
             <div
+              ref={ClickBoxRef}
               className="RampInputSelect--input"
               onClick={(event) => {
                 setDropdownPosition(getDropdownPosition(event.target))
